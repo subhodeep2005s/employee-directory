@@ -16,20 +16,24 @@ export default async function EmployeesPage() {
     redirect("/")
   }
 
+  const isAdmin = session.user.role === "admin"
+
   return (
     <DashboardShell>
       <DashboardHeader heading="Employees" text="Manage your employee directory.">
-        <Link href="/dashboard/employees/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Employee
-          </Button>
-        </Link>
+        {isAdmin && (
+          <Link href="/dashboard/employees/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Employee
+            </Button>
+          </Link>
+        )}
       </DashboardHeader>
       <div className="mb-4">
         <EmployeeSearch />
       </div>
-      <EmployeeTable />
+      <EmployeeTable isAdmin={isAdmin} />
     </DashboardShell>
   )
 }

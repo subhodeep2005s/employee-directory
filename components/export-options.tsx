@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Download } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -20,8 +21,15 @@ const formSchema = z.object({
 })
 
 export function ExportOptions() {
+  const { data: session } = useSession()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
+
+  const isAdmin = session?.user?.role === "admin"
+
+  if (!isAdmin) {
+    return null
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -35,9 +43,8 @@ export function ExportOptions() {
 
     try {
       const data = await exportEmployees(values.format)
-
-      // Create a blob and download it
-      const blob = new Blob([values.format === "json" ? JSON.stringify(data, null, 2) : data], {
+      const content = values.format === "json" ? JSON.stringify(data, null, 2) : data as string
+      const blob = new Blob([content], {
         type: values.format === "json" ? "application/json" : "text/csv",
       })
 

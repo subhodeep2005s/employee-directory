@@ -5,6 +5,7 @@ import type React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { BarChart3, Users, Download, Settings } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -13,6 +14,7 @@ interface NavItem {
   title: string
   href: string
   icon: React.ComponentType<{ className?: string }>
+  adminOnly?: boolean
 }
 
 const navItems: NavItem[] = [
@@ -20,6 +22,7 @@ const navItems: NavItem[] = [
     title: "Dashboard",
     href: "/dashboard",
     icon: BarChart3,
+    adminOnly: true,
   },
   {
     title: "Employees",
@@ -30,6 +33,7 @@ const navItems: NavItem[] = [
     title: "Export Data",
     href: "/dashboard/export",
     icon: Download,
+    adminOnly: true,
   },
   {
     title: "Settings",
@@ -40,10 +44,14 @@ const navItems: NavItem[] = [
 
 export function DashboardNav() {
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const isAdmin = session?.user?.role === "admin"
 
   return (
     <nav className="grid items-start gap-2">
       {navItems.map((item) => {
+        if (item.adminOnly && !isAdmin) return null
+        
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
 
         return (

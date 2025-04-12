@@ -5,6 +5,8 @@ import { Employee } from "@/lib/models/employee"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { createObjectCsvStringifier } from "csv-writer"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 const employeeSchema = z.object({
   employeeId: z.string().min(1),
@@ -16,7 +18,15 @@ const employeeSchema = z.object({
   joiningDate: z.date(),
 })
 
+async function checkAdminAccess() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user || session.user.role !== "admin") {
+    throw new Error("Unauthorized: Admin access required")
+  }
+}
+
 export async function createEmployee(employeeData: z.infer<typeof employeeSchema>) {
+  await checkAdminAccess()
   const validatedFields = employeeSchema.parse(employeeData)
 
   await connectToDatabase()
@@ -93,6 +103,7 @@ export async function getEmployeeById(id: string) {
 }
 
 export async function updateEmployee(id: string, employeeData: z.infer<typeof employeeSchema>) {
+  await checkAdminAccess()
   const validatedFields = employeeSchema.parse(employeeData)
 
   await connectToDatabase()
@@ -135,6 +146,7 @@ export async function updateEmployee(id: string, employeeData: z.infer<typeof em
 }
 
 export async function deleteEmployee(id: string) {
+  await checkAdminAccess()
   await connectToDatabase()
 
   const employee = await Employee.findByIdAndDelete(id)
@@ -149,6 +161,7 @@ export async function deleteEmployee(id: string) {
 }
 
 export async function exportEmployees(format: "csv" | "json") {
+  await checkAdminAccess()
   await connectToDatabase()
 
   const employees = await Employee.find().sort({ name: 1 })

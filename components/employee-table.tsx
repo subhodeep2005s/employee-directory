@@ -34,7 +34,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-export function EmployeeTable() {
+interface EmployeeTableProps {
+  isAdmin: boolean
+}
+
+export function EmployeeTable({ isAdmin }: EmployeeTableProps) {
   const { toast } = useToast()
   const router = useRouter()
   const { employees, isLoading, mutate } = useEmployees()
@@ -84,6 +88,8 @@ export function EmployeeTable() {
       id: "actions",
       cell: ({ row }) => {
         const employee = row.original
+
+        if (!isAdmin) return null
 
         return (
           <DropdownMenu>

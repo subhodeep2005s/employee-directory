@@ -14,6 +14,10 @@ export default async function DashboardPage() {
     redirect("/")
   }
 
+  if (session.user.role !== "admin") {
+    redirect("/dashboard/employees")
+  }
+
   return (
     <DashboardShell>
       <DashboardHeader heading="Dashboard" text="Welcome to your employee directory dashboard." />

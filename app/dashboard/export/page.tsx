@@ -12,6 +12,10 @@ export default async function ExportPage() {
     redirect("/")
   }
 
+  if (session.user.role !== "admin") {
+    redirect("/dashboard")
+  }
+
   return (
     <DashboardShell>
       <DashboardHeader heading="Export Data" text="Export employee data in different formats." />
